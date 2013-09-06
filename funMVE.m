@@ -10,6 +10,17 @@ function [output] = funMVE(test_1, test_2, markerTemp, fs, windowLength, fLow,du
 % last updated - 6/01/2013
 % - conduct band-passed filtering for input raw EMG data first
 
+% for debug
+% test_1 = temp_1;
+% test_2 = temp_2;
+% markerTemp = handles.markerTemp;
+% fs = handles.fs;
+% windowLength = handles.windowLength;
+% fLow = handles.fLow;
+% duration = handles.duration;
+% shift = handles.shift;
+% mode = 'mean';
+
 % butterworh 3rd order bandpass filter btw 10 and 479Hz
 fn=fs/2;    %Hz - Nyquist Frequency - 1/2 Sampling Frequency
 [B,A]= butter(3,[10,479]/fn);
@@ -20,62 +31,13 @@ filtered_2 = zeros(size(test_2,1),size(test_2,2));
 filtered_2(:, 2:end)=filtfilt(B, A, test_2(:, 2:end)); 
 filtered_2(:,1) = test_2(:, 1);
 clear A B
-% isequal(test_2(:,1), filtered_2(:,1))
-%figure('name','Filter Compare');
-%isequal(test_1(:,7), filtered_1(:,7))
-%plot(test_2(:,1),test_2(:,4), filtered_2(:,1),filtered_2(:,4))
-%legend('raw EMG', 'filtered EMG');grid on;
-%plot(test_2(:,1),filtered_2(:,4), filtered_2(:,1),test_2(:,4)- filtered_2(:,4))
-%legend('filtered EMG', 'diff btw raw and filtered EMG');grid on;
 
-%keyboard
-
-%error(nargchk(9,10,nargin));
-narginchk(9,10);
-
-num = muscle{4} + 1;
-marker = markerTemp([1 num]);
+num = muscle{4} * 2 - 1;
+marker = markerTemp(num:num+1);
 muscle_1 = filtered_1(:,[1 num]);
 muscle_2 = filtered_2(:,[1 num]);
 
-%if strcmp(muscle,'RF')
-%    marker = markerTemp(1:2);
-%    muscle_1 = filtered_1(:,1:2);
-%    muscle_2 = filtered_2(:,1:2);
-%elseif strcmp(muscle,'BF')
-%    marker = markerTemp(3:4);
-%    muscle_1 = filtered_1(:,[1 3]);
-%    muscle_2 = filtered_2(:,[1 3]);
-%    
-%elseif strcmp(muscle,'TA')
-%    marker = markerTemp(5:6);
-%    muscle_1 = filtered_1(:,[1 4]);
-%    muscle_2 = filtered_2(:,[1 4]);
-%    
-%elseif strcmp(muscle,'GAS')
-%    marker = markerTemp(7:8);
-%    muscle_1 = filtered_1(:,[1 5]);
-%    muscle_2 = filtered_2(:,[1 5]);
-%    
-%elseif strcmp(muscle,'ES')
-%    marker = markerTemp(9:10);
-%    muscle_1 = filtered_1(:,[1 6]);
-%    muscle_2 = filtered_2(:,[1 6]);
-%    
-%elseif strcmp(muscle,'RA')
-%    marker = markerTemp(11:12);
-%    muscle_1 = filtered_1(:,[1 7]);
-%    muscle_2 = filtered_2(:,[1 7]);
-%end
-
 markerMVC = [marker+ shift/1000 ; marker + (shift + duration) /1000];
-
-%keyboard
-
-%EA1 = emgEA(muscle_1, markerMVC(:,1), fs, windowLength);
-%keyboard
-%plot(EA1.cycle.data(:,1), EA1.cycle.data(:,2), EA1_new.cycle.data(:,3), EA1_new.cycle.data(:,2))
-%legend('EA1', 'EA1new')
 
 EA1 = emgEA(muscle_1, markerMVC(:,1), fs, windowLength, 'marker');
 result.EA.rep(1).data = EA1.cycle(1).data;

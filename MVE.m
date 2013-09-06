@@ -1,5 +1,10 @@
 function [output] = MVE(test_1, test_2, markerTemp, fs, windowLength, fLow,duration, shift, muscle, mode)
 
+test_1 = temp_1;
+test_2 = temp_2;
+muscle = 'GAS';
+mode = 'mean';
+
 
 %if 'mode' argument does not be provided in the argument list, the function
 % will output the max value for that particular duraiton in the order of

@@ -1,18 +1,18 @@
 function handles = config(handles)
 
 % Folders & Files Setting
-handles.filePrefix = 'B02-1';
+handles.filePrefix = 'B01-3';
 handles.fileSuffix = '-sk-stair-down-one';
 handles.MVC_folder = '..\MVC\';
-handles.output_folder = 'C:\Users\Roliroli\Desktop\output';
+handles.output_folder = 'C:\Users\Roliroli\Desktop\Jim\output';
 
 % Walking Trial
-handles.walking_file = '..\B02-1-sk-stair-down-one.asc';
-handles.mvn_marker = '..\time_byMVN.txt';
+handles.walking_file = '..\B01-3-sk-stair-down-one.asc';
+handles.mvn_marker = '..\B01-3-sk-stair-down-one.txt';
 
 % MVC Trial
 handles.encoding = '-ascii';
-handles.mvc_marker = '..\MVC\MVC_marker.txt';
+handles.mvc_marker = '..\MVC\B01-3-MVC_marker.txt';
 
 %% Don't touch this
 MVC_path = strcat(handles.MVC_folder, handles.filePrefix);
@@ -51,4 +51,4 @@ handles.walking_trial = walk(~any(isnan(walk), 2), :); % nan filter
 
 handles.time_byMVN = load(handles.mvn_marker, '-ascii');
 
-handles.selectedMuscle = 1;
+handles.selectedMuscle = 4;

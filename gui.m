@@ -115,10 +115,10 @@ if(strcmp(choice, 'Yes') == 1)
 	list = get(handles.goalList, 'String');
 	methods_index = get(handles.goalList, 'Value'); % all : 1, EA: 2, LE: 3...
 	name = strcat(muscle{1}, '-Multi Cycle(', list{methods_index}, ')');
-	figure('name', name);
+	fig = figure('name', name);
 
 	if (methods_index ~= 1) % plot specific method
-		hold on
+		hold on;
 		for i = 1 : length(cycles);
 			plot(result.(methods{methods_index - 1}).cycle(cycles{i}).data(:,3), result.(methods{methods_index - 1}).cycle(cycles{i}).data(:,2), 'color', cc(j*delta,:))
 			legendString{j} = sprintf('Cycle %d', cycles{i});
@@ -199,7 +199,30 @@ if(strcmp(choice, 'Yes') == 1)
 		xlim([0 100]);
 		grid on;
 	else
-		msgbox('Cannot support the goal "All"');
+		indicators = fieldnames(handles.result); % indicator field (ex: RF, LE, MA, RMS, RMS_s)
+		
+		for i = 1 : length(indicators)
+			indicator = (indicators{i});
+			
+			muscle = cellstr(handles.muscle_list{handles.selectedMuscle});
+			
+			name = strcat(muscle{1}, '-Median Cycle(', indicator, ')');
+			fig = figure('name', name);
+			
+			goal = handles.reducedData.(indicator);
+
+			plot(goal.medianCycle.data(:,1), goal.medianCycle.data(:,2) ,'-b')
+			hold on
+			errorbar(goal.meanCycle.data(:,1), goal.meanCycle.data(:,2), goal.stdCycle.data(:,2),'xr')
+			hold on
+			errorbar(goal.meanCycle.data(:,1), goal.meanCycle.data(:,2), goal.stdCycle.data(:,2)/sqrt(7-3),'--g')
+			hold off
+			legend('median Cycle', 'mean Cycle with SD', 'mean Cycle with SE')
+			xlim([0 100]);
+			grid on;
+			
+			saveas(fig, strcat(handles.output_folder, handles.filePrefix, handles.fileSuffix, '-', muscle{1}, '-Median Cycle(', indicator, ')'), 'jpg');
+		end
 	end
 end
 % Update handles structure

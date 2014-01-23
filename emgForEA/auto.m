@@ -52,6 +52,7 @@ for i = 1:length(SUBJECT_LIST)
         
         result.(strcat('TASK', j)).(MUSCLE_LIST{j}).totalEA = task_result.totalEA;
         result.(strcat('TASK', j)).(MUSCLE_LIST{j}).detailEA = task_result.detailEA;
+        
 		% for debug
 		% j = 1;
 	

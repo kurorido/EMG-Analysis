@@ -13,9 +13,9 @@ MUSCLE_LIST(5) = {'PD'};
 MUSCLE_LIST(6) = {'BI'};
 MUSCLE_LIST(7) = {'SS'};
 
-TEST_CASE_FILE = 'E:\FTP\emgCode\test_case_file.xlsx';
+TEST_CASE_FILE = 'E:\FTP\EMG-Analysis\emgForEA\test_case_file.xlsx';
 SUBJECT_FILE_FOLDER = 'L:\PRE-TEST\';
-OUTPUT_FILE_FOLDER = 'E:\FTP\emgCode\output\';
+OUTPUT_FILE_FOLDER = 'L:\PRE-TEST\output\';
 TASK_NUM = 2;
 
 %% configuration

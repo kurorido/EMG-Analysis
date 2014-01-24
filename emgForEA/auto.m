@@ -36,7 +36,7 @@ for i = 1:length(SUBJECT_LIST)
         %%%%%%%% STATIC
         STATIC_FILE_PATH = strcat(SUBJECT_PATH , 'STATIC.asc');
 		STATIC_MARKER_PATH = strcat(SUBJECT_PATH , 'STATIC_M.asc');
-        static_result = runTask(STATIC_FILE_PATH, STATIC_MARKER_PATH);
+        static_result = runTask(STATIC_FILE_PATH, STATIC_MARKER_PATH, j, fs);
         staticEA = static_result.totalEA;
         
         % Save STATIC EA value into result
@@ -47,28 +47,30 @@ for i = 1:length(SUBJECT_LIST)
 	% for each task
 	for j = 1:TASK_NUM
 	
-        TASK_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', j, '\TASK', j ,'.asc');
-        TASK_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', j, '\TASK', j ,'_M.asc');
-        task_result = runTask(TASK_FILE_PATH, TASK_MARKER_PATH, j, fs);
+        TASK_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) ,'.asc');
+        TASK_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK',  int2str(j), '\TASK',  int2str(j) ,'_M.asc');
 		
+        outputValue = cell(length(MUSCLE_LIST), 5);
 		% for each muscle
 		for k = 1:length(MUSCLE_LIST)
         
-			result.(strcat('TASK', j)).(MUSCLE_LIST{k}).totalEA = task_result.totalEA;
-			result.(strcat('TASK', j)).(MUSCLE_LIST{k}).detailEA = task_result.detailEA;
+            task_result = runTask(TASK_FILE_PATH, TASK_MARKER_PATH, k, fs);
+            
+			result.(strcat('TASK', int2str(j))).(MUSCLE_LIST{k}).totalEA = task_result.totalEA;
+			result.(strcat('TASK', int2str(j))).(MUSCLE_LIST{k}).detailEA = task_result.detailEA;
 		
 			taskEA = task_result.totalEA;
 			detailEA = task_result.detailEA;
 
-			result.(strcat('TASK', j)).(MUSCLE_LIST{k}).taskEA = taskEA;
+			result.(strcat('TASK', int2str(j))).(MUSCLE_LIST{k}).taskEA = taskEA;
 		
 			%%%%%%%% Calculate %MVE
-			taskMVE = (taskEA - staticEA) / (mvcEA - staticEA);
+			taskMVE = (taskEA - result.MVC.(MUSCLE_LIST{k}).staticEA) / (result.MVC.(MUSCLE_LIST{k}).mvcEA - result.MVC.(MUSCLE_LIST{k}).staticEA);
 
-			result.(strcat('TASK', j)).(MUSCLE_LIST{k}).taskMVE = taskMVE;
+			result.(strcat('TASK', int2str(j))).(MUSCLE_LIST{k}).taskMVE = taskMVE;
 			
 			%%%%%%% Plot 
-			name = strcat(SUBJECT_LIST{i}, '-TASK', j, '-', MUSCLE_LIST{k}, '-EA');
+			name = strcat(SUBJECT_LIST{i}, '-TASK',  int2str(j), '-', MUSCLE_LIST{k}, '-EA');
 			fig = figure('name', name);
 			hold on;
 			
@@ -76,20 +78,27 @@ for i = 1:length(SUBJECT_LIST)
 			plot(1:length(detailEA), detailEA);
 			p = polyfit(1:length(detailEA), detailEA,1);
 			vectors = polyval(p, 1:length(detailEA));
-			plot(x, vectors, 'r');
+			plot(1:length(detailEA), vectors, 'r');
 			slope = p(1);
 			axis tight;
 			
 			saveas(fig, strcat(OUTPUT_FILE_FOLDER, name), 'jpg');
 			
 			hold off;
+            
+            
+            %%%%%%% Calculate POST %MVE
+            POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'.asc');
+            POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '_M','.asc');
 			
-			outputValue(k, 1) = result.MVC.(MUSCLE_LIST{k}).mvcEA;
-			outputValue(k, 2) = result.MVC.(MUSCLE_LIST{k}).staticEA;
-			outputValue(k, 3) = taskEA;
-			outputValue(k, 4) = taskMVE;
-			outputValue(k, 5) = slope;
-
+            post_result = runTask(POST_MVE_FILE_PATH, POST_MVE_MARKER_PATH, 1, fs);
+            postEA = post_result.totalEA;
+            
+			outputValue{k, 1} = result.MVC.(MUSCLE_LIST{k}).mvcEA;
+            outputValue{k, 2} = postEA;
+            outputValue{k, 3} = taskMVE;
+            outputValue{k, 4} = slope;
+			outputValue{k, 5} = result.MVC.(MUSCLE_LIST{k}).staticEA;
 		end
 		
 		%%%%%%%% Export Task to Excel
@@ -105,16 +114,16 @@ for i = 1:length(SUBJECT_LIST)
 		header = {'PRE_MVE','POST_MVE','Progress_%MVE','Progress_slope','STATIC_MVE'};
 		 
 		%%%% write out to sheet
-		xlswrite(fullfile(excelFileName), header, strcat('TASK', j), 'B1');
-		xlswrite(fullfile(excelFileName), tranpose(MUSCLE_LIST), strcat('TASK', j), 'A1');
-		xlswrite(fullfile(excelFileName), outputValue, strcat('TASK', j), 'B2');
+		xlswrite(fullfile(excelFileName), header, strcat('TASK', int2str(j)), 'B1');
+		xlswrite(fullfile(excelFileName), transpose(MUSCLE_LIST), strcat('TASK', int2str(j)), 'A2');
+		xlswrite(fullfile(excelFileName), outputValue, strcat('TASK', int2str(j)), 'B2');
 		 
 		% if file not exist, delete default sheet
 		if(deleteFlag == 1)
 			% Delete Default Sheet
 			% Open Excel file.
 			objExcel = actxserver('Excel.Application');
-			objExcel.Workbooks.Open(fullfile(excelFilePath, excelFileName)); % Full path is necessary!
+			objExcel.Workbooks.Open(fullfile(excelFileName)); % Full path is necessary!
 
 			% Delete sheets.
 			try

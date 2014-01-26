@@ -16,36 +16,60 @@ for i = 1:length(SUBJECT_LIST)
     
     %%%%% Calculate MVC for each muscle
     for j = 1:length(MUSCLE_LIST)
-        %%%%%%%% MVC
-      	MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '.asc');
-        MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '_M', '.asc');  
-       
-		rawEMG = load(MVC_FILE_PATH, '-ascii');
-		filteredEMG = filterRawEMG(rawEMG, fs);
-		marker = dlmread(MVC_MARKER_PATH);
-		marker = transpose(marker);
-		firstEA_result = calcEA(filteredEMG, marker(1), marker(2), fs);
-        firstEA = firstEA_result.totalEA;
-		secondEA_result = calcEA(filteredEMG, marker(3), marker(4), fs);
-        secondEA = secondEA_result.totalEA;
-		mvcEA = (firstEA + secondEA) / 2;
         
-        % Save MVC EA value into result
-        result.MVC.(MUSCLE_LIST{j}).mvcEA = mvcEA;
+        if(isfield(SPECIAL_CASE_LIST, (SUBJECT_LIST{i})) &&  isfield(SPECIAL_CASE_LIST.(SUBJECT_LIST{i}), 'PRE') && isfield(SPECIAL_CASE_LIST.(SUBJECT_LIST{i}).PRE, (MUSCLE_LIST{j}))) % Special Case, there are two MVC Files
+            
+            FIRST_MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '.asc');
+            FIRST_MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '_M', '.asc');
+            
+            firstEA_result = runTask(FIRST_MVC_FILE_PATH, FIRST_MVC_MARKER_PATH, i, fs);
+            firstEA = firstEA_result.totalEA;
+
+            SECOND_MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '-2.asc');
+            SECOND_MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '-2_M', '.asc');
+            
+            secondEA_result = runTask(SECOND_MVC_FILE_PATH, SECOND_MVC_MARKER_PATH, i, fs);
+            secondEA = secondEA_result.totalEA;
+            
+            mvcEA = (firstEA + secondEA) / 2;
+
+            % Save MVC EA value into result
+            result.MVC.(MUSCLE_LIST{j}).mvcEA = mvcEA;            
+            
+        else
+            %%%%%%%% MVC
+            MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '.asc');
+            MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '_M', '.asc');  
+
+            rawEMG = load(MVC_FILE_PATH, '-ascii');
+            filteredEMG = filterRawEMG(rawEMG, fs);
+            marker = dlmread(MVC_MARKER_PATH);
+            marker = transpose(marker);
+            firstEA_result = calcEA(filteredEMG, marker(1), marker(2), fs);
+            firstEA = firstEA_result.totalEA;
+            secondEA_result = calcEA(filteredEMG, marker(3), marker(4), fs);
+            secondEA = secondEA_result.totalEA;
+            mvcEA = (firstEA + secondEA) / 2;
+
+            % Save MVC EA value into result
+            result.MVC.(MUSCLE_LIST{j}).mvcEA = mvcEA;
+
+        end
         
+
         %%%%%%%% STATIC
         STATIC_FILE_PATH = strcat(SUBJECT_PATH , 'STATIC.asc');
-		STATIC_MARKER_PATH = strcat(SUBJECT_PATH , 'STATIC_M.asc');
+        STATIC_MARKER_PATH = strcat(SUBJECT_PATH , 'STATIC_M.asc');
         static_result = runTask(STATIC_FILE_PATH, STATIC_MARKER_PATH, j, fs);
         staticEA = static_result.totalEA;
-        
+
         % Save STATIC EA value into result
-        result.MVC.(MUSCLE_LIST{j}).staticEA = staticEA;
+        result.MVC.(MUSCLE_LIST{j}).staticEA = staticEA;        
     end
     %%%%% End Calculate MVC for each muscle
 	
 	% for each task
-	for j = 1:TASK_NUM
+    for j = 1:TASK_NUM
 	
         TASK_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) ,'.asc');
         TASK_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK',  int2str(j), '\TASK',  int2str(j) ,'_M.asc');
@@ -88,11 +112,38 @@ for i = 1:length(SUBJECT_LIST)
             
             
             %%%%%%% Calculate POST %MVE
-            POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'.asc');
-            POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '_M','.asc');
-			
-            post_result = runTask(POST_MVE_FILE_PATH, POST_MVE_MARKER_PATH, 1, fs);
-            postEA = post_result.totalEA;
+            if(isfield(SPECIAL_CASE_LIST, (SUBJECT_LIST{i})) &&  isfield(SPECIAL_CASE_LIST.(SUBJECT_LIST{i}), strcat('TASK', int2str(j))) && isfield(SPECIAL_CASE_LIST.(SUBJECT_LIST{i}).(strcat('TASK', int2str(j))), (MUSCLE_LIST{k}))) % Special Case, there are two MVC Files
+                
+                FIRST_POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'.asc');
+                FIRST_POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '_M','.asc');
+                
+                firstEA_result = runTask(FIRST_POST_MVE_FILE_PATH, FIRST_POST_MVE_MARKER_PATH, k, fs);
+                firstEA = firstEA_result.totalEA;
+                
+                SECOND_POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'-2.asc');
+                SECOND_POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '-2_M','.asc');
+                
+                secondEA_result = runTask(SECOND_POST_MVE_FILE_PATH, SECOND_POST_MVE_MARKER_PATH, k, fs);
+                secondEA = secondEA_result.totalEA;
+
+                postEA = (firstEA + secondEA) / 2;
+                
+            else
+            
+                POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'.asc');
+                POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '_M','.asc');
+
+                rawEMG = load(POST_MVE_FILE_PATH, '-ascii');
+                filteredEMG = filterRawEMG(rawEMG, fs);
+                marker = dlmread(POST_MVE_MARKER_PATH);
+                marker = transpose(marker);
+                firstEA_result = calcEA(filteredEMG, marker(1), marker(2), fs);
+                firstEA = firstEA_result.totalEA;
+                secondEA_result = calcEA(filteredEMG, marker(3), marker(4), fs);
+                secondEA = secondEA_result.totalEA;
+                postEA = (firstEA + secondEA) / 2;
+            
+            end
             
 			outputValue{k, 1} = result.MVC.(MUSCLE_LIST{k}).mvcEA;
             outputValue{k, 2} = postEA;
@@ -140,7 +191,7 @@ for i = 1:length(SUBJECT_LIST)
 			objExcel.ActiveWorkbook.Close;
 			objExcel.Quit;
 			objExcel.delete;
-		end
+        end
     end
 	
 end

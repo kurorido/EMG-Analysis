@@ -22,13 +22,13 @@ for i = 1:length(SUBJECT_LIST)
             FIRST_MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '.asc');
             FIRST_MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '_M', '.asc');
             
-            firstEA_result = runTask(FIRST_MVC_FILE_PATH, FIRST_MVC_MARKER_PATH, i, fs);
+            firstEA_result = runTask(FIRST_MVC_FILE_PATH, FIRST_MVC_MARKER_PATH, 1, fs);
             firstEA = firstEA_result.totalEA;
 
             SECOND_MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '-2.asc');
             SECOND_MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '-2_M', '.asc');
             
-            secondEA_result = runTask(SECOND_MVC_FILE_PATH, SECOND_MVC_MARKER_PATH, i, fs);
+            secondEA_result = runTask(SECOND_MVC_FILE_PATH, SECOND_MVC_MARKER_PATH, 1, fs);
             secondEA = secondEA_result.totalEA;
             
             mvcEA = (firstEA + secondEA) / 2;
@@ -117,13 +117,13 @@ for i = 1:length(SUBJECT_LIST)
                 FIRST_POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'.asc');
                 FIRST_POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '_M','.asc');
                 
-                firstEA_result = runTask(FIRST_POST_MVE_FILE_PATH, FIRST_POST_MVE_MARKER_PATH, k, fs);
+                firstEA_result = runTask(FIRST_POST_MVE_FILE_PATH, FIRST_POST_MVE_MARKER_PATH, 1, fs);
                 firstEA = firstEA_result.totalEA;
                 
                 SECOND_POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'-2.asc');
                 SECOND_POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '-2_M','.asc');
                 
-                secondEA_result = runTask(SECOND_POST_MVE_FILE_PATH, SECOND_POST_MVE_MARKER_PATH, k, fs);
+                secondEA_result = runTask(SECOND_POST_MVE_FILE_PATH, SECOND_POST_MVE_MARKER_PATH, 1, fs);
                 secondEA = secondEA_result.totalEA;
 
                 postEA = (firstEA + secondEA) / 2;
@@ -150,6 +150,11 @@ for i = 1:length(SUBJECT_LIST)
             outputValue{k, 3} = taskMVE;
             outputValue{k, 4} = slope;
 			outputValue{k, 5} = result.MVC.(MUSCLE_LIST{k}).staticEA;
+            
+            pre = result.MVC.(MUSCLE_LIST{k}).mvcEA - result.MVC.(MUSCLE_LIST{k}).staticEA;
+            post = postEA - result.MVC.(MUSCLE_LIST{k}).staticEA;
+            
+            outputValue{k, 6} = post / pre;
 		end
 		
 		%%%%%%%% Export Task to Excel
@@ -162,7 +167,7 @@ for i = 1:length(SUBJECT_LIST)
 			deleteFlag = 0;
 		end
 		 
-		header = {'PRE_MVE','POST_MVE','Progress_%MVE','Progress_slope','STATIC_MVE'};
+		header = {'PRE_MVE','POST_MVE','Progress_%MVE','Progress_slope','STATIC_MVE','%MVE'};
 		 
 		%%%% write out to sheet
 		xlswrite(fullfile(excelFileName), header, strcat('TASK', int2str(j)), 'B1');

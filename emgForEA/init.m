@@ -15,12 +15,14 @@ MUSCLE_LIST(7) = {'SS'};
 
 TEST_CASE_FILE = 'E:\FTP\EMG-Analysis\emgForEA\test_case_file.xlsx';
 SPECIAL_CASE_FILE = 'E:\FTP\EMG-Analysis\emgForEA\special_case.xlsx';
-SUBJECT_FILE_FOLDER = 'M:\PRE-TEST\';
-OUTPUT_FILE_FOLDER = 'M:\PRE-TEST\output\';
+SUBJECT_FILE_FOLDER = 'L:\PRE-TEST\';
+OUTPUT_FILE_FOLDER = 'L:\PRE-TEST\output\';
 TASK_NUM = 2;
 
 %% configuration
 fs = 960;
+interval = 100; % millisecond
+last = 30; % second
 
 %% Don't Touch
 % Load subject list

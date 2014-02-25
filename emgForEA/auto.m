@@ -22,13 +22,13 @@ for i = 1:length(SUBJECT_LIST)
             FIRST_MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '.asc');
             FIRST_MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '_M', '.asc');
             
-            firstEA_result = runTask(FIRST_MVC_FILE_PATH, FIRST_MVC_MARKER_PATH, 1, fs);
+            firstEA_result = runTask(FIRST_MVC_FILE_PATH, FIRST_MVC_MARKER_PATH, 1, fs, 1000, -1);
             firstEA = firstEA_result.totalEA;
 
             SECOND_MVC_FILE_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '-2.asc');
             SECOND_MVC_MARKER_PATH = strcat(SUBJECT_PATH , 'PRE\', 'PRE_', MUSCLE_LIST{j}, '-2_M', '.asc');
             
-            secondEA_result = runTask(SECOND_MVC_FILE_PATH, SECOND_MVC_MARKER_PATH, 1, fs);
+            secondEA_result = runTask(SECOND_MVC_FILE_PATH, SECOND_MVC_MARKER_PATH, 1, fs, 1000, -1);
             secondEA = secondEA_result.totalEA;
             
             mvcEA = (firstEA + secondEA) / 2;
@@ -45,9 +45,9 @@ for i = 1:length(SUBJECT_LIST)
             filteredEMG = filterRawEMG(rawEMG, fs);
             marker = dlmread(MVC_MARKER_PATH);
             marker = transpose(marker);
-            firstEA_result = calcEA(filteredEMG, marker(1), marker(2), fs);
+            firstEA_result = calcEA(filteredEMG, marker(1), marker(2), fs, 1000, -1);
             firstEA = firstEA_result.totalEA;
-            secondEA_result = calcEA(filteredEMG, marker(3), marker(4), fs);
+            secondEA_result = calcEA(filteredEMG, marker(3), marker(4), fs, 1000, -1);
             secondEA = secondEA_result.totalEA;
             mvcEA = (firstEA + secondEA) / 2;
 
@@ -60,7 +60,7 @@ for i = 1:length(SUBJECT_LIST)
         %%%%%%%% STATIC
         STATIC_FILE_PATH = strcat(SUBJECT_PATH , 'STATIC.asc');
         STATIC_MARKER_PATH = strcat(SUBJECT_PATH , 'STATIC_M.asc');
-        static_result = runTask(STATIC_FILE_PATH, STATIC_MARKER_PATH, j, fs);
+        static_result = runTask(STATIC_FILE_PATH, STATIC_MARKER_PATH, j, fs, 1000, -1);
         staticEA = static_result.totalEA;
 
         % Save STATIC EA value into result
@@ -78,7 +78,7 @@ for i = 1:length(SUBJECT_LIST)
 		% for each muscle
 		for k = 1:length(MUSCLE_LIST)
         
-            task_result = runTask(TASK_FILE_PATH, TASK_MARKER_PATH, k, fs);
+            task_result = runTask(TASK_FILE_PATH, TASK_MARKER_PATH, k, fs, interval, last);
             
 			result.(strcat('TASK', int2str(j))).(MUSCLE_LIST{k}).totalEA = task_result.totalEA;
 			result.(strcat('TASK', int2str(j))).(MUSCLE_LIST{k}).detailEA = task_result.detailEA;
@@ -98,7 +98,7 @@ for i = 1:length(SUBJECT_LIST)
 			fig = figure('name', name);
 			hold on;
 			
-			%%%%%%%% Plot TASK EA (In 3 minutes)
+			%%%%%%%% Plot TASK EA (In last - endMarker)
 			plot(1:length(detailEA), detailEA);
 			p = polyfit(1:length(detailEA), detailEA,1);
 			vectors = polyval(p, 1:length(detailEA));
@@ -117,13 +117,13 @@ for i = 1:length(SUBJECT_LIST)
                 FIRST_POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'.asc');
                 FIRST_POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '_M','.asc');
                 
-                firstEA_result = runTask(FIRST_POST_MVE_FILE_PATH, FIRST_POST_MVE_MARKER_PATH, 1, fs);
+                firstEA_result = runTask(FIRST_POST_MVE_FILE_PATH, FIRST_POST_MVE_MARKER_PATH, 1, fs, 1000, -1);
                 firstEA = firstEA_result.totalEA;
                 
                 SECOND_POST_MVE_FILE_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k},'-2.asc');
                 SECOND_POST_MVE_MARKER_PATH = strcat(SUBJECT_PATH , 'TASK', int2str(j), '\TASK', int2str(j) , '_',MUSCLE_LIST{k}, '-2_M','.asc');
                 
-                secondEA_result = runTask(SECOND_POST_MVE_FILE_PATH, SECOND_POST_MVE_MARKER_PATH, 1, fs);
+                secondEA_result = runTask(SECOND_POST_MVE_FILE_PATH, SECOND_POST_MVE_MARKER_PATH, 1, fs, 1000, -1);
                 secondEA = secondEA_result.totalEA;
 
                 postEA = (firstEA + secondEA) / 2;
@@ -137,9 +137,9 @@ for i = 1:length(SUBJECT_LIST)
                 filteredEMG = filterRawEMG(rawEMG, fs);
                 marker = dlmread(POST_MVE_MARKER_PATH);
                 marker = transpose(marker);
-                firstEA_result = calcEA(filteredEMG, marker(1), marker(2), fs);
+                firstEA_result = calcEA(filteredEMG, marker(1), marker(2), fs, 1000, -1);
                 firstEA = firstEA_result.totalEA;
-                secondEA_result = calcEA(filteredEMG, marker(3), marker(4), fs);
+                secondEA_result = calcEA(filteredEMG, marker(3), marker(4), fs, 1000, -1);
                 secondEA = secondEA_result.totalEA;
                 postEA = (firstEA + secondEA) / 2;
             
@@ -156,7 +156,7 @@ for i = 1:length(SUBJECT_LIST)
             
             outputValue{k, 6} = post / pre;
 		end
-		
+		% end for each muscle
 		%%%%%%%% Export Task to Excel
 		% Initalize Output Path
 		excelFileName = strcat(OUTPUT_FILE_FOLDER, SUBJECT_LIST{i}, '.xlsx');
@@ -198,5 +198,5 @@ for i = 1:length(SUBJECT_LIST)
 			objExcel.delete;
         end
     end
-	
+	% end for each task
 end
